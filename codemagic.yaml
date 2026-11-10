@@ -1,0 +1,33 @@
+workflows:
+  gully-cricket-cloud-build:
+    name: Gully Cricket - Cloud Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Extract Flutter source
+        script: |
+          mkdir -p app
+          unzip -o gully_cricket_mvp_source.zip -d app
+      - name: Generate Android and iOS platform projects
+        script: |
+          cd app
+          flutter create --platforms=android,ios .
+          flutter pub get
+      - name: Build Android release APK
+        script: |
+          cd app
+          flutter build apk --release
+      - name: Compile iOS app (unsigned)
+        script: |
+          cd app
+          flutter build ios --release --no-codesign
+    artifacts:
+      - app/build/app/outputs/flutter-apk/*.apk
+      - app/build/ios/iphoneos/Runner.app
+    publishing:
+      email:
+        recipients: []
